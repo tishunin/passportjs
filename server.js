@@ -1,37 +1,28 @@
 const express = require('express');
-const passport = require('passport'), LocalStrategy = require('passport-local').Strategy;
-const path = require('path');
 const app = express();
 const port = 3000;
-const router = express.Router();
+var mongoose = require('mongoose');
+var passport = require('passport'), LocalStrategy = require('passport-local').Strategy;
+var flash = require('connect-flash');
+var morgan = require('morgan');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
+var session = require('express-session');
+var configDB = require('./config/database.js');
 
-passport.use(new LocalStrategy(
-  function(username, password, done) {
-    User.findOne({ username: username }, function (err, user) {
-      if (err) { return done(err); }
-      if (!user) {
-        return done(null, false, { message: 'Incorrect username.' });
-      }
-      if (!user.validPassword(password)) {
-        return done(null, false, { message: 'Incorrect password.' });
-      }
-      return done(null, user);
-    });
-  }
-));
+mongoose.connect(configDB.url);
+app.use(morgan('dev'));
+app.use(cookieParser());
+app.use(bodyParser());
+app.set('view engine','ejs');
+app.use(session({secret:'sessionsecret'}));
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(flash());
 
-router.get('/',function(req,res){
-  res.sendFile(path.join(__dirname+'/index.html'));
-  //__dirname : It will resolve to your project folder.
-});
- 
-router.post('/login',
-  passport.authenticate(),
-  function(req, res) {
-    // If this function gets called, authentication was successful.
-    // `req.user` contains the authenticated user.
-    res.redirect('/users/' + req.user.username);
-  });
-  
-  app.use('/', router);
-  app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+require('.app/routes.js')(app,passport);
+
+// launch server
+
+app.listen(port);
+console.log('server started on port ' + port);
