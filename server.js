@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const port = 3000;
+const port = process.env.port || 8080;
 var mongoose = require('mongoose');
 var passport = require('passport'), LocalStrategy = require('passport-local').Strategy;
 var flash = require('connect-flash');
@@ -11,6 +11,9 @@ var session = require('express-session');
 var configDB = require('./config/database.js');
 
 mongoose.connect(configDB.url);
+
+// require('./config/passport')(passport); // pass passport for configuration
+
 app.use(morgan('dev'));
 app.use(cookieParser());
 app.use(bodyParser());
