@@ -11,8 +11,7 @@ var session = require('express-session');
 var configDB = require('./config/database.js');
 
 mongoose.connect(configDB.url);
-
-// require('./config/passport')(passport); // pass passport for configuration
+require('./config/passport')(passport); // pass passport for configuration
 
 app.use(morgan('dev'));
 app.use(cookieParser());
@@ -23,7 +22,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 
-require('.app/routes.js')(app,passport);
+require('./app/routes.js')(app,passport);
 
 // launch server
 
